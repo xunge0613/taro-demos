@@ -1,0 +1,45 @@
+body,page {
+    // page 为了兼容小程序
+    // font: 14px "Century Gothic", Futura, sans-serif;
+    margin: 20px;
+  }
+
+.status {
+    margin-bottom: 20px;
+}
+
+// 一行三个，清除浮动
+.board-row:after {
+    clear: both;
+    content: "";
+    display: table;
+}
+
+
+.square {
+  background: #fff;
+  border: 1px solid #999;
+  float: left;
+  font-size: 32px;
+  font-weight: bold;
+  line-height: 66px;
+  height: 66px;
+  margin-right: -1px;
+  margin-top: -1px;
+  padding: 0;
+  text-align: center;
+  width: 66px;
+}
+
+.square:focus {
+    outline: none;  
+}
+
+.game {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .game-info {
+    margin-left: 20px;
+  }
