@@ -31,6 +31,10 @@ body,page {
   width: 66px;
 }
 
+.square.highlight {
+  color: red;
+}
+
 .square:focus {
     outline: none;  
 }
@@ -46,4 +50,10 @@ body,page {
 
   .game-info {
     margin-left: 20px;
+  }
+
+  .action-list {
+    position: fixed;
+    bottom: 60px;
+    left: 60px;
   }

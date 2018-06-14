@@ -6,6 +6,7 @@ import './index.scss'
  
  
 // 计算获胜规则
+// @return {winner: 'X', moves: [a,b,c]} 
 function calculateWinner(squares) {
   const lines = [
     [0, 1, 2],
@@ -20,7 +21,10 @@ function calculateWinner(squares) {
   for (let i = 0; i < lines.length; i++) {
     const [a, b, c] = lines[i];
     if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
+      return {
+        winner: squares[a],
+        moves: [a,b,c],
+      };
     }
   }
   return null;
@@ -35,13 +39,15 @@ export default class Index extends Component {
       history: [{
         squares: Array(9).fill(''),
         point: {},
+        index: 0,
       }],
       stepNumber: 0,
       xIsNext: true,
       highlightCurrent: {
         // time travel 时高亮当前步数
         status: false,      
-      }
+      },
+      isDescRecords: false,
       
     };
   }
@@ -84,7 +90,8 @@ export default class Index extends Component {
     this.setState({
       history: history.concat([{
         squares: squares,
-        point: point
+        point: point,
+        index: history.length,
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
@@ -94,6 +101,7 @@ export default class Index extends Component {
 
   // time travel
   jumpTo(step) {
+    console.log(step)
     this.setState({
       stepNumber: step,
       xIsNext: (step % 2) === 0,
@@ -103,20 +111,42 @@ export default class Index extends Component {
     });
   }
 
+  // 倒序记录
+  reverseRecords() {
+    this.setState({
+      isDescRecords: !this.state.isDescRecords,
+    })
+  }
+
   render () {
-    const history = this.state.history;
+    const isDescRecords = this.state.isDescRecords;
+    let history = this.state.history.concat(); // 深拷贝，以便于倒序不改变原数组
     const current = history[this.state.stepNumber]; 
     const winner = calculateWinner(current.squares);
-   
+    
+     
+    // 倒序
+    if(isDescRecords) {
+      history = history.reverse();
+    } 
+
     const moves = history.map((step, move) => {
       // console.log( this.state.stepNumber,move)
-      let isHighlight = this.state.highlightCurrent.status && this.state.stepNumber == move; // 高亮当前选择的步骤
+      
+      // console.log(jumpMove)
+      if(isDescRecords) {
+        // 倒序
+        move = history.length - move - 1;        
+      }      
+
+      let jumpMove = move; // 必须使用临时变量记录待跳转值，否则会出错 TBD 可以研究一下
+     
       const desc = move ?
         `Go to move #${move}, at (${step.point.x},${step.point.y})` :
         'Go to game start';
       return (
-        <View key={move} className={ isHighlight ? 'highlight' : ''}>
-          <View onClick={this.jumpTo.bind(this,move)}>{desc}</View>
+        <View key={move} className={ this.state.highlightCurrent.status && this.state.stepNumber === move ? 'highlight' : ''}>
+          <View onClick={this.jumpTo.bind(this,jumpMove)}>{desc}</View>
         </View>
       );
     });
@@ -124,9 +154,15 @@ export default class Index extends Component {
 
     let status;
     if (winner) {
-      status = 'Winner: ' + winner;
-    } else {
-      status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+      status = 'Winner: ' + winner.winner;
+    } else {      
+      //console.log(history.length)
+      // 如果无人获胜，提示平局
+      if(history.length === 10) {        
+        status = 'Round Draw';
+      } else {
+        status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
+      }      
     }
 
 
@@ -135,12 +171,16 @@ export default class Index extends Component {
       <View className="game">
         <View className="game-board">
           <Board 
-            squares={current.squares}           
+            squares={current.squares}   
+            winnerMoves={winner ? winner.moves : []}        
           />
         </View>
         <View className="game-info">
           <View>{ status }</View>
           <View>{ moves }</View>
+        </View>
+        <View className="action-list">
+          <Button size="mini" type="primary" onClick={this.reverseRecords} >倒序记录</Button>
         </View>
       </View>
     )

@@ -18,7 +18,7 @@ export default class Square extends Component {
 
     render () {
         return (
-            <View className="square" onClick={this.handleClick}>
+            <View className={['square',this.props.highlightWinner ? 'highlight':'']} onClick={this.handleClick}>
              {this.props.value}
             </View>
         )
