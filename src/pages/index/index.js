@@ -155,10 +155,9 @@ export default class Index extends Component {
     let status;
     if (winner) {
       status = 'Winner: ' + winner.winner;
-    } else {      
-      //console.log(history.length)
+    } else {        
       // 如果无人获胜，提示平局
-      if(history.length === 10) {        
+      if(this.state.stepNumber === 9) {        
         status = 'Round Draw';
       } else {
         status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
