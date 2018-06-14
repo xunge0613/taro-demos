@@ -33,10 +33,16 @@ export default class Index extends Component {
 
     this.state = {
       history: [{
-        squares: Array(9).fill('')
+        squares: Array(9).fill(''),
+        point: {},
       }],
       stepNumber: 0,
-      xIsNext: true
+      xIsNext: true,
+      highlightCurrent: {
+        // time travel 时高亮当前步数
+        status: false,      
+      }
+      
     };
   }
 
@@ -67,16 +73,22 @@ export default class Index extends Component {
     const history = this.state.history.slice(0, this.state.stepNumber + 1);
     const current = history[history.length - 1];
     const squares = current.squares.slice();
+    const point = {
+      x: i%3,
+      y: parseInt(i/3),
+    }
     if (calculateWinner(squares) || squares[i]) {
       return;
     }
     squares[i] = this.state.xIsNext ? 'X' : 'O';
     this.setState({
       history: history.concat([{
-        squares: squares
+        squares: squares,
+        point: point
       }]),
       stepNumber: history.length,
       xIsNext: !this.state.xIsNext,
+      highlightCurrent: false,
     });
   }
 
@@ -84,21 +96,26 @@ export default class Index extends Component {
   jumpTo(step) {
     this.setState({
       stepNumber: step,
-      xIsNext: (step % 2) === 0
+      xIsNext: (step % 2) === 0,
+      highlightCurrent: {
+        status: true,       
+      },
     });
   }
 
   render () {
     const history = this.state.history;
-    const current = history[this.state.stepNumber];
+    const current = history[this.state.stepNumber]; 
     const winner = calculateWinner(current.squares);
    
     const moves = history.map((step, move) => {
+      // console.log( this.state.stepNumber,move)
+      let isHighlight = this.state.highlightCurrent.status && this.state.stepNumber == move; // 高亮当前选择的步骤
       const desc = move ?
-        'Go to move #' + move :
+        `Go to move #${move}, at (${step.point.x},${step.point.y})` :
         'Go to game start';
       return (
-        <View key={move}>
+        <View key={move} className={ isHighlight ? 'highlight' : ''}>
           <View onClick={this.jumpTo.bind(this,move)}>{desc}</View>
         </View>
       );
